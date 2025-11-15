@@ -58,18 +58,27 @@ VulkanPushPool::Block VulkanPushPool::CreateBlock(size_t size) {
 	Block block{};
 	block.size = size;
 	block.frameIndex = -1;
-
+/*
 	VkBufferCreateInfo b{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
 	b.size = size;
 	b.usage = usage_;
 	b.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	VmaAllocationCreateInfo allocCreateInfo{};
 
+	VmaAllocationCreateInfo allocCreateInfo{};
 	allocCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 	allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;  // required to not get memory where we have to manually flush.
 	VmaAllocationInfo allocInfo{};
 	
 	VkResult result = vmaCreateBuffer(vulkan_->Allocator(), &b, &allocCreateInfo, &block.buffer, &block.allocation, &allocInfo);
+*/
+	VkBufferCreateInfo bufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+	bufferInfo.size = size;
+	bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+	VmaAllocationCreateInfo allocInfo = {};
+	allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+	VkResult result = vmaCreateBuffer(vulkan_->Allocator(), &bufferInfo, &allocInfo, &block.buffer, &block.allocation, nullptr);
 
 	_assert_msg_(result == VK_SUCCESS, "VulkanPushPool: Failed to create buffer (result = %s, size = %d)", VulkanResultToString(result), (int)size);
 
